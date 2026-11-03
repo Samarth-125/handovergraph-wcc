@@ -5,17 +5,14 @@ export const metadata = {
   description: 'Turn a departing developer\'s scattered work into a handover you can check.',
 };
 
+// Runs before the page paints, so a dark-mode visitor never sees a white flash.
+const THEME = `try{var t=localStorage.theme;if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`;
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-stone-50 text-stone-800 antialiased">
-        <header className="border-b bg-white">
-          <div className="mx-auto max-w-3xl px-5 py-4 text-lg font-semibold tracking-tight">
-            Handover<span className="text-teal-700">Graph</span>
-          </div>
-        </header>
-        <main className="mx-auto max-w-3xl space-y-8 px-5 py-8">{children}</main>
-      </body>
+    <html lang="en" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: THEME }} /></head>
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }

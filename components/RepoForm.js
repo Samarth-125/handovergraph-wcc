@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-const box = 'mt-1 w-full rounded-lg border bg-white px-3 py-2';
+const box = 'mt-1 w-full rounded-lg border bg-card px-3 py-2';
 
 export default function RepoForm({ onDone }) {
   const [form, setForm] = useState({ repo: '', person: '', token: '' });
@@ -15,18 +15,22 @@ export default function RepoForm({ onDone }) {
 
   async function run(body) {
     setStatus({ busy: true, error: '' });
-    const res = await fetch('/api/analyze', { method: 'POST', body: JSON.stringify(body) });
-    const out = await res.json();
-    if (!res.ok) return setStatus({ busy: false, error: out.error });
-    setStatus({ busy: false, error: '' });
-    onDone(out);
+    try {
+      const res = await fetch('/api/analyze', { method: 'POST', body: JSON.stringify(body) });
+      const out = await res.json();
+      if (!res.ok) return setStatus({ busy: false, error: out.error });
+      setStatus({ busy: false, error: '' });
+      onDone(out);
+    } catch {
+      setStatus({ busy: false, error: 'Could not reach the server. Check your connection and try again.' });
+    }
   }
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); run({ ...form, docs }); }} className="space-y-4 rounded-xl border bg-white p-6">
+    <form onSubmit={(e) => { e.preventDefault(); run({ ...form, docs }); }} className="space-y-4 rounded-xl border bg-card p-6">
       <div>
         <h1 className="text-2xl font-semibold">Someone is leaving. Let's capture what they know.</h1>
-        <p className="mt-1 text-stone-500">Point us at the repository and the person. We read their commits, pull requests and issues, add any notes you upload, and draft a handover you can check.</p>
+        <p className="mt-1 text-mute">Point us at the repository and the person. We read their commits, pull requests and issues, add any notes you upload, and draft a handover you can check.</p>
       </div>
       <label className="block text-sm font-medium">Repository
         <input required placeholder="owner/name" value={form.repo} onChange={set('repo')} className={box} />
@@ -40,16 +44,16 @@ export default function RepoForm({ onDone }) {
       <label className="block text-sm font-medium">GitHub token (optional, for private repos or rate limits)
         <input type="password" value={form.token} onChange={set('token')} className={box} />
       </label>
-      {status.error && <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{status.error}</p>}
+      {status.error && <p className="rounded-lg bg-rose-500/10 p-3 text-sm text-rose-700 dark:text-rose-300">{status.error}</p>}
       <div className="flex gap-3">
-        <button disabled={status.busy} className="rounded-lg bg-teal-700 px-4 py-2 font-medium text-white disabled:opacity-60">
+        <button disabled={status.busy} className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-60">
           {status.busy ? 'Reading the history…' : 'Build handover'}
         </button>
         <button type="button" disabled={status.busy} onClick={() => run({ useSample: true })} className="rounded-lg border px-4 py-2">
           Try the sample project
         </button>
       </div>
-      <p className="text-xs text-stone-400">We only read. The token is used for this request and never stored.</p>
+      <p className="text-xs text-mute">We only read. The token is used for this request and never stored.</p>
     </form>
   );
 }

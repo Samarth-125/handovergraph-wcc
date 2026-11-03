@@ -31,3 +31,17 @@ test('stats count only the chosen person', () => {
   assert.equal(result.stats.prsOpened, 2);
   assert.equal(result.stats.prsMerged, 1);
 });
+
+test('flags missing documentation when no notes are uploaded', () => {
+  const noDocs = analyze(sample.data, sample.person, []);
+  assert.ok(noDocs.gaps.some((g) => g.type === 'Missing documentation'));
+});
+
+test('flags low coverage when the person has almost no history', () => {
+  const empty = { pulls: [], issues: [], comments: [], commits: [], details: [] };
+  assert.ok(analyze(empty, 'nobody', []).gaps.some((g) => g.type === 'Low coverage'));
+});
+
+test('the sources list includes everything the person wrote, not only cited items', () => {
+  assert.ok(Object.keys(result.sources).length > new Set(result.claims.map((c) => c.source)).size);
+});
